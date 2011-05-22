@@ -69,4 +69,4 @@ library
                       cbits/cxapian_termiterator.cc
                       cbits/cxapian_valueiterator.cc
   cc-options:         -Wall -c
-  extra-libraries:    xapian
+  extra-libraries:    xapian z 
