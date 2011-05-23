@@ -32,7 +32,6 @@ module Search.Xapian.Internal.Types
        ) where
 
 import Foreign
-import Foreign.C.Types
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
 import Data.Map (Map)
@@ -152,11 +151,11 @@ data Document fields dat = Document
     , documentLazyTerms :: Maybe [Term]
     , documentLazyFields :: Maybe (Map fields [ByteString])
     , documentLazyData  :: Maybe dat
-    , documentDiffs :: Seq (DocumentDiff fields dat)
+    , documentDiffs :: Seq (DocumentDiff dat)
     } deriving (Show)
 
 -- FIXME: unpack stuff to save space
-data DocumentDiff fields dat
+data DocumentDiff dat
     = AddTerm ByteString {-# UNPACK #-} !Word32
     | DelTerm ByteString
     | AddTerms [(ByteString, Word32)]
@@ -167,7 +166,7 @@ data DocumentDiff fields dat
     | DelPostings [(ByteString, Word32, Word32)]
     | AddValue {-# UNPACK #-} !Word32 ByteString
     | DelValue {-# UNPACK #-} !Word32
-    | AddRawText ByteString
+    | AddRawText ByteString (Maybe Stemmer)
     | SetData dat
     | ClearTerms
     | ClearValues

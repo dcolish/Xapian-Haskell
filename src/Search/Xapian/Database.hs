@@ -2,18 +2,18 @@ module Search.Xapian.Database where
 
 import Prelude hiding (words)
 import Foreign
-import Foreign.C.Types
+-- import Foreign.C.Types
 import Foreign.C.String
-import Control.Monad (forM_)
+-- import Control.Monad (forM_)
 import Control.Applicative
-import Control.Arrow ((***))
-import qualified Data.ByteString as BS
-import Data.ByteString.Char8 (ByteString, pack, useAsCString, words)
+-- import Control.Arrow ((***))
+-- import qualified Data.ByteString as BS
+import Data.ByteString.Char8 (ByteString, pack, useAsCString)
 import Data.Either (rights)
-import qualified Data.IntMap as IntMap
-import qualified Data.Map as Map
+-- import qualified Data.IntMap as IntMap
+-- import qualified Data.Map as Map
 import Data.Serialize
-import Data.Traversable (sequenceA)
+-- import Data.Traversable (sequenceA)
 
 import Search.Xapian.Document
 import Search.Xapian.Types
@@ -120,7 +120,7 @@ addDocument :: (Serialize dat, Prefixable fields)
             -> IO DocumentId
 addDocument (WritableDatabase dbFPtr) document =
     withForeignPtr dbFPtr $ \dbPtr ->
-     do docFPtr <- applyAccumulatedChanges document
+     do docFPtr <- applyAccChanges document
         withForeignPtr docFPtr $ \docPtr ->
          do fmap DocId $ cx_database_add_document dbPtr docPtr
 
@@ -145,6 +145,6 @@ replaceDocument :: (Serialize dat, Prefixable fields)
                 -> IO ()
 replaceDocument (WritableDatabase dbFPtr) (DocId id') document =
     withForeignPtr dbFPtr $ \dbPtr ->
-     do docFPtr <- applyAccumulatedChanges document
+     do docFPtr <- applyAccChanges document
         withForeignPtr docFPtr $ \docPtr ->
             cx_database_replace_document dbPtr id' docPtr

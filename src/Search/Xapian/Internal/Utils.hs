@@ -26,9 +26,7 @@ module Search.Xapian.Internal.Utils
 import Foreign
 import Foreign.C.String
 import Blaze.ByteString.Builder as Blaze
-import Control.Monad
 import Data.Monoid
-import Data.Maybe (maybe)
 import qualified Data.ByteString as BS
 import Data.ByteString.Char8 (pack, ByteString, packCString, useAsCString)
 import Data.IntMap (IntMap)
@@ -38,8 +36,8 @@ import Data.Serialize
 import System.IO.Unsafe (unsafeInterleaveIO)
 
 import Search.Xapian.Internal.Types
-import Search.Xapian.Types
 import Search.Xapian.Internal.FFI
+
 
 -- * General
 
@@ -68,14 +66,14 @@ collect next' get' finished' pos' end' =
     withForeignPtr end' $ \endPtr ->
     collect' next' get' finished' posPtr endPtr
   where
-    collect' next get finished pos end =
+    collect' next get'' finished pos end =
      do exit <- finished pos end
         if exit /= 0
            then do return []
-           else do elem <- get pos
-                   next pos
-                   rest <- collect' next get finished pos end
-                   return (elem : rest)
+           else do el <- get'' pos
+                   _ <- next pos
+                   rest <- collect' next get'' finished pos end
+                   return (el : rest)
 
 collectPositions :: ForeignPtr CPositionIterator
                  -> ForeignPtr CPositionIterator
@@ -191,10 +189,14 @@ getDocumentData docFPtr =
 -- because cstrings can't contain any NULL value, we have to store 7 bytes of
 -- date as 8 bytes of data
 
+_zero :: Word8
 _zero = 48 :: Word8
+z :: Word8
 z  = 122 :: Word8
-z' = BS.pack [z]
+-- z' = BS.pack [z]
+z0 :: ByteString
 z0 = BS.pack [z,_zero]
+zz :: ByteString
 zz = BS.pack [z,z]
 
 -- | unnullify maps NULL to z0 and z to zz
@@ -203,8 +205,9 @@ unnullify = Blaze.toByteString . go
   where
     go bs =
       let (xs,xss) = BS.span (\x -> x /= 0 && x /= z) bs
-          replacement = if BS.head xss == 0 then z0
-                                            else zz -- this part is still not failsafe
+          replacement = if BS.head xss == 0
+                        then z0
+                        else zz -- this part is still not failsafe
       in if BS.null xss
             then Blaze.fromByteString xs
             else Blaze.fromByteString xs `mappend`
@@ -215,22 +218,23 @@ unnullify = Blaze.toByteString . go
 nullify :: ByteString -> Either String ByteString
 nullify bs = case go bs of
                   Right builder -> Right $ Blaze.toByteString builder
-                  Left error    -> Left error
+                  Left error'   -> Left error'
   where
     go :: ByteString -> Either String Blaze.Builder
-    go bs =
-        let (xs,xss) = BS.span (/= z) bs
-            replacement = if xss `BS.index` 1 == _zero then 0 :: Word8
-                                                       else z -- this part is still not failsafe
+    go bs' =
+        let (xs,xss) = BS.span (/= z) bs'
+            replacement = if xss `BS.index` 1 == _zero
+                          then 0 :: Word8
+                          else z -- this part is still not failsafe
         in  if BS.null xss
                then Right $ Blaze.fromByteString xs
                else if BS.length xss == 1
-                       then Left "nullify: failed to decode document data"
-                       else case go (BS.drop 2 xss) of
-                                 Right rest -> Right $ Blaze.fromByteString xs `mappend`
-                                                       Blaze.fromStorable replacement `mappend`
-                                                       rest
-                                 error      -> error
+                    then Left "nullify: failed to decode document data"
+                    else case go (BS.drop 2 xss) of
+                      Right rest -> Right $ Blaze.fromByteString xs `mappend`
+                                    Blaze.fromStorable replacement `mappend`
+                                    rest
+                      error'      -> error'
 
 -- | @indexToDocument stemmer document text@ adds stemmed posting terms derived from
 -- @text@ using the stemming algorith @stemmer@ to @doc@

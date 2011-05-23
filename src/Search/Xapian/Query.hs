@@ -13,6 +13,7 @@ module Search.Xapian.Query
        
        -- * Lower level
        , compileQuery
+       , describeQuery
      ) where
 
 import Foreign
@@ -144,10 +145,10 @@ compileQuery query' =
           -> ForeignPtr CQuery
           -> ForeignPtr CQuery
           -> IO (ForeignPtr CQuery)
-    merge opcode a b =
+    merge opcode' a b =
         withForeignPtr a $ \queryA ->
         withForeignPtr b $ \queryB ->
-            cx_query_new_1 opcode queryA queryB >>= manage
+            cx_query_new_1 opcode' queryA queryB >>= manage
 
 -- * Helper functions
 

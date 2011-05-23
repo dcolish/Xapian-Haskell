@@ -1,2 +1,4 @@
 libcxapian*
 test.db/
+*.hi
+cabal-dev

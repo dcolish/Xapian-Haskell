@@ -5,9 +5,6 @@ import Foreign
 import Foreign.C.String
 import Foreign.C.Types
 
-import qualified Data.ByteString as BS
-
-
 class Manageable a where
     manage :: Ptr a -> IO (ForeignPtr a)
 
@@ -306,7 +303,7 @@ foreign import ccall unsafe "&document_delete"
     cx_document_delete :: FunPtr (Ptr CDocument -> IO ())
 
 foreign import ccall unsafe "document_get_value"
-    cx_document_get_value :: Ptr CDocument -> IO CString
+    cx_document_get_value :: Ptr CDocument -> Word32 -> IO CString
 
 foreign import ccall unsafe "document_add_value"
     cx_document_add_value :: Ptr CDocument -> Word32 -> CString -> IO ()

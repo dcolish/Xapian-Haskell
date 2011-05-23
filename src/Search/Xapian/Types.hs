@@ -66,16 +66,14 @@ import Search.Xapian.Internal.FFI
 
 class ReadableDatabase db where
   search :: (Serialize dat, Prefixable fields)
-         => db fields dat
-         -> Query
-         -> QueryRange
-         -> IO (MSet fields dat)
-
-
+            => db fields dat
+            -> Query
+            -> QueryRange
+            -> IO (MSet fields dat)
   getDocument :: (Serialize dat, Prefixable fields)
-              => db fields dat
-              -> DocumentId
-              -> IO (Either Error (Document fields dat))
+                 => db fields dat
+                 -> DocumentId
+                 -> IO (Either Error (Document fields dat))
 
 
 data InitDBOption

@@ -1,5 +1,5 @@
 name:           Xapian-Haskell
-version:        0.0.1
+version:        0.0.2
 license:        OtherLicense
 license-file:   LICENSE
 author:         Oliver Charles <oliver.g.charles@googlemail.com>
@@ -68,5 +68,6 @@ library
                       cbits/cxapian_termgenerator.cc
                       cbits/cxapian_termiterator.cc
                       cbits/cxapian_valueiterator.cc
-  cc-options:         -Wall -c
+  cc-options:         -Wall -c 
+  include-dirs:       /opt/local/include
   extra-libraries:    xapian z 
